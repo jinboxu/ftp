@@ -19,7 +19,11 @@ class Ftp_server(object):
         getattr(self, login_eroll)()
         # cmd_list = ["get", "upload", "ls", "logout"]
         while True:
-            self.cmd_list = eval(conn.recv(1024).decode())
+            cmd = conn.recv(1024)
+            if not cmd:
+                print("客户端已断开")
+                break
+            self.cmd_list = eval(cmd.decode())
             print(self.cmd_list)
             cmd_name = self.cmd_list[0]
             getattr(self, cmd_name)()
@@ -36,6 +40,7 @@ class Ftp_server(object):
             if user_passwd[0] in self.user_passwd and self.user_passwd[user_passwd[0]] == user_passwd[1]:
                 conn.send(b"True")
                 home_dir = base_dir + os.sep + "home" + os.sep + user_passwd[0] + os.sep
+                # home_dir = os.path.join(base_dir, "home", user_passwd[0])
                 os.chdir(home_dir)
                 break
             else:
@@ -106,3 +111,4 @@ class Ftp_server(object):
 
 if __name__ == '__main__':
     Ftp_server()
+    server.close()
